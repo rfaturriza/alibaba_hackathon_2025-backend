@@ -1,5 +1,7 @@
 const { connectMongo } = require("../db/mongo");
 const Order = require("../models/Order");
+// Ensure Product model is registered before using populate
+require("../models/Product");
 
 async function getHistoriesOrderHandler(req, res) {
   if (req.method !== "GET") return res.status(405).send("Method Not Allowed");
@@ -15,6 +17,7 @@ async function getHistoriesOrderHandler(req, res) {
     const histories = await Order.find({ user_id })
       .sort({ createdAt: -1 })
       .populate("product");
+    console.log("Order histories fetched:", histories);
 
     res.status(200).json({
       message: "Order histories fetched successfully",
@@ -25,7 +28,7 @@ async function getHistoriesOrderHandler(req, res) {
           ...orderData,
           product: {
             id: product._id.toString(),
-            ...product.toObject(),
+            ...product,
           },
         };
       }),

@@ -16,7 +16,13 @@ async function generateOrderedToday(userId) {
   const orders = await Order.find({
     user_id: userId,
     createdAt: { $gte: start, $lte: end },
-  });
+  }).populate("product");
+
+  if (!orders || orders.length === 0) {
+    console.log("No orders found for today");
+    return;
+  }
+  console.log("Orders for today:", orders);
   let result = "";
 
   for (const order of orders) {
@@ -26,6 +32,7 @@ async function generateOrderedToday(userId) {
       nutrition
     )}\n\n`;
   }
+  console.log("Generated ordered nutrition for today:", result);
   return result;
 }
 
@@ -38,7 +45,11 @@ async function orderProductHandler(req, res) {
     console.log("Product found:", product);
     if (!product) return res.status(404).json({ error: "Product not found" });
     const nutritionToday = await generateOrderedToday(user_id);
-    const prompting = `
+
+    // if force_order is false, check nutrition limits
+    // if nutritionToday is not empty, we will check the nutrition limits
+    if (!force_order && nutritionToday) {
+      const prompting = `
         You are a master nutritionist tasked with evaluating a user's food intake based on the following food nutrition information for today:
 
         ${nutritionToday}
@@ -49,22 +60,19 @@ async function orderProductHandler(req, res) {
         2. Compare the totals with the following daily recommended nutrition limits (based on WHO & CDC):
         - Calory: 2000 kcal  
         - Protein: 50 g  
-        - Fat: 70 g  
         - Carbohydrate: 275 g  
-        - Fiber: 28 g  
+        - Fat: 70 g  
         - Sugar: 50 g  
-        - Sodium: 2300 mg  
-        - Cholesterol: 300 mg  
+        - Fiber: 28 g  
         3. Based on your analysis, determine if the user **exceeds** any of these limits.  
         4. Return your answer in **strict JSON format only**:  
-        {"message": "your explanation and suggestion to alert user", "alert": boolean}  
-        - The "message" must clearly explain which limits are exceeded and any potential health concerns.  
+        {"message": "your explanation and suggestion to alert user", "alert": boolean, "exceeded": [ { "param": "calory", "total": "nutrition_value", "limit": "nutrition_limit" }, ... ] }
+        - The "message" must clearly explain which limits are exceeded and any potential health concerns. dont use word user, replace with "You" pronoun.  
         - The "alert" field must be "true" if any daily limit is exceeded, otherwise "false".  
         5. Do not include any extra text or markdown formatting.  
         6. Only output valid JSON.
     `;
 
-    if (!force_order) {
       const completion = await openai.chat.completions
         .create({
           model: "qwen-vl-max",
@@ -99,9 +107,12 @@ async function orderProductHandler(req, res) {
           "Daily nutrition limits exceeded:",
           parsedResponse.message
         );
-        return res.status(400).json({
+        const alertMessage = `${parsedResponse.message} \n\n Are you sure you want to proceed with this order?`;
+        return res.status(200).json({
           error: "Daily nutrition limits exceeded",
-          message: parsedResponse.message,
+          message: alertMessage,
+          alert: true,
+          exceeded: parsedResponse.exceeded,
         });
       }
     }

@@ -105,6 +105,7 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
 ```json
 {
   "product_id": "string",
+  "force_order": false, // optional, default false, force order even if nutrition limits exceeded
   "user_id": "string"
 }
 ```

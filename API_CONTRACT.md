@@ -117,7 +117,6 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
 {
   "message": "Order placed successfully",
   "data": {
-    "product_id": "string",
     "order_id": "string",
     "product": {
       "id": "string",

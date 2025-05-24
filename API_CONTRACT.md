@@ -121,7 +121,7 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
 
 - `201 Created` (order placed successfully)
 
-````json
+```json
 {
   "message": "Order placed successfully",
   "data": {
@@ -150,7 +150,7 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
     "updatedAt": "ISODate"
   }
 }
-````
+```
 
 - `200 OK` (nutrition exceeded)
 
@@ -226,7 +226,66 @@ Get all order histories for a user, sorted by most recent.
 
 ---
 
-## 5. Health Check
+## 5. Get Products Prompt (LLM Recommendation)
+
+**Endpoint:** `GET /api/products-prompt?prompt=...`
+
+**Description:**
+Get product recommendations based on a user prompt, budget, and nutrition constraints using LLM. The LLM will:
+
+- Only answer if the prompt is relevant to the product database.
+- Arrange products based on price and daily recommended nutrition.
+- Respect user budget and product quantity constraints.
+- Return an empty array if no suitable products are found.
+- Always return a strict JSON array of products (no extra text/markdown).
+
+**Query Parameters:**
+
+- `prompt`: string (required) — User's query, e.g. "I want 2 meals under 50,000 IDR with high protein"
+
+**Response:**
+
+- `200 OK`
+
+```json
+{
+  "message": "Products fetched successfully",
+  "data": [
+    {
+      "id": "6831cd71c172276f70d3b5c9",
+      "nutrition": {
+        "calory": "550 kcal",
+        "protein": "25 g",
+        "carbohydrate": "80 g",
+        "fat": "20 g",
+        "sugar": "10 g",
+        "fiber": "5 g",
+        "allergen_potential": "egg, gluten"
+      },
+      "_id": "6831cd71c172276f70d3b5c9",
+      "images_url": [
+        "http://147.139.169.55/static/1748094317105-557766886.jpeg",
+        "http://147.139.169.55/static/1748094317181-274086011.jpeg"
+      ],
+      "title": "Nasi Goreng Spesial 6",
+      "description": "Nasi goreng dengan ayam, telur, dan sayur.",
+      "price": 25000,
+      "merchant_id": "merchant_id",
+      "createdAt": "2025-05-24T13:45:21.928Z",
+      "updatedAt": "2025-05-24T13:45:21.928Z",
+      "__v": 0
+    },
+    ...
+  ]
+}
+```
+
+- `400 Bad Request` (missing prompt, invalid JSON from LLM)
+- `500 Internal Server Error` (OpenAI API error, server error)
+
+---
+
+## 6. Health Check
 
 **Endpoint:** `GET /api`
 

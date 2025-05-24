@@ -11,7 +11,10 @@ async function handler(req, res) {
     const products = await Product.find({});
     res.status(200).json({
       message: "Products fetched successfully",
-      data: products,
+      data: products.map((product) => ({
+        id: product._id.toString(),
+        ...product.toObject(),
+      })),
     });
   } catch (error) {
     console.error("Error fetching products:", error);

@@ -10,6 +10,7 @@ const { getProductsHandler } = require("./handlers/getProducts");
 const { createProductHandler } = require("./handlers/createProduct");
 const { orderProductHandler } = require("./handlers/orderProduct");
 const { getHistoriesOrderHandler } = require("./handlers/getHistoriesOrder");
+const { getProductsPromptHandler } = require("./handlers/getProductsPrompt");
 
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +41,7 @@ app.get("/api/products", getProductsHandler);
 app.post("/api/products", createProductHandler);
 app.post("/api/order", orderProductHandler);
 app.get("/api/histories", getHistoriesOrderHandler);
+app.get("/api/products-prompt", getProductsPromptHandler);
 
 // Render create product form
 app.get("/create-product", (req, res) => {

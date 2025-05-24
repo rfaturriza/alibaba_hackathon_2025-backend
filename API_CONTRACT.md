@@ -16,28 +16,35 @@ Get all products in the database.
 - `200 OK`
 
 ```json
-[
-  {
-    "id": "string",
-    "images_url": ["/static/filename1.jpg", ...],
-    "title": "string",
-    "description": "string",
-    "price": 25000,
-    "nutrition": {
-      "calory": "string",
-      "protein": "string",
-      "carbohydrate": "string",
-      "fat": "string",
-      "sugar": "string",
-      "fiber": "string",
-      "allergen_potential": "string"
-    },
-    "merchant_id": "string|null",
-    "createdAt": "ISODate",
-    "updatedAt": "ISODate"
-  },
-  ...
-]
+{
+  "message": "Products fetched successfully",
+  "data": [
+    {
+      "id": "6831cd71c172276f70d3b5c9",
+      "nutrition": {
+        "calory": "550 kcal",
+        "protein": "25 g",
+        "carbohydrate": "80 g",
+        "fat": "20 g",
+        "sugar": "10 g",
+        "fiber": "5 g",
+        "allergen_potential": "egg, gluten"
+      },
+      "_id": "6831cd71c172276f70d3b5c9",
+      "images_url": [
+        "http://147.139.169.55/static/1748094317105-557766886.jpeg",
+        "http://147.139.169.55/static/1748094317181-274086011.jpeg"
+      ],
+      "title": "Nasi Goreng Spesial 6",
+      "description": "Nasi goreng dengan ayam, telur, dan sayur.",
+      "price": 25000,
+      "merchant_id": "merchant_id",
+      "createdAt": "2025-05-24T13:45:21.928Z",
+      "updatedAt": "2025-05-24T13:45:21.928Z",
+      "__v": 0
+    }
+  ]
+}
 ```
 
 ---

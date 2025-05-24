@@ -37,7 +37,7 @@ async function createProductHandler(req, res) {
         return res.status(400).json({ error: "Product already exists" });
       }
       // Prompt generation to get nutrition info
-      const prompt = `
+      const prompting = `
         You are a master nutritionist that will be asked to determine food nutrition based on Image and food description. Here is the info:
 
         Food Name: Fried Rice
@@ -63,11 +63,12 @@ async function createProductHandler(req, res) {
             content: [
               {
                 type: "text",
-                text: prompt,
+                text: prompting,
               },
               {
                 type: "image_url",
                 image_url: {
+                  //   url: "https://i.gojekapi.com/darkroom/gofood-indonesia/v2/images/uploads/63137a09-ec63-473b-a123-0cb44071acfc_menu-item-image_1630457203193.jpg",
                   url: imageUrls[0], // Use the first image URL for nutrition analysis
                 },
               },
@@ -75,6 +76,13 @@ async function createProductHandler(req, res) {
           },
         ],
       });
+      if (
+        !completion ||
+        !completion.choices ||
+        completion.choices.length === 0
+      ) {
+        return res.status(500).json({ error: "Failed to get nutrition info" });
+      }
       let nutrition = {};
       try {
         nutrition = JSON.parse(completion.choices[0].message.content);

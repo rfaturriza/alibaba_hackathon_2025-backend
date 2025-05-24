@@ -28,6 +28,8 @@ connectMongo()
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// Serve static files from the /static directory (for image uploads)
+app.use("/static", express.static(path.join(__dirname, "static")));
 // API routes
 app.get("/api", (_, res) => {
   res.json({ message: "I am a live" });

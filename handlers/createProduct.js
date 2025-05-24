@@ -40,53 +40,77 @@ async function createProductHandler(req, res) {
       const prompting = `
         You are a master nutritionist that will be asked to determine food nutrition based on Image and food description. Here is the info:
 
-        Food Name: Fried Rice
-        Description: Nasi goreng lengkap dengan ayam goreng tepung 1 potong, telur mata sapi 1 butir, dan sayur timun selada, serta sambal cabai merah
+        Food Name: ${title}
+        Description: ${description}
 
         On the mentioned image and food description: 
         0. Do not explain anything
         1. You have to specify each nutrition that existed on the food
         2. Please only answer the total nutritions calculation with it's value and also add for additional info that might be great
         3. Allergic or something else are allowed.
-        4. Please use this format: '{"calory": "nutrition value", "protein": "nutrition value", "fat": "nutrition value", "carbohydrate": "nutrition value", "fiber": "nutrition value", "sugar": "nutrition value", "sodium": "nutrition value", "cholesterol": "nutrition value", "allergic_potential": "nutrition value", "additional_info": "nutrition value"}'
-        5. For the nutrition value, please use the appropriate unit such as "g", "mg", "kcal", etc.
+        4. Please use this format: '
+        {
+        "calory": "nutrition_value",
+        "protein": "nutrition_value",
+        "carbohydrate": "nutrition_value",
+        "fat": "nutrition_value",
+        "sugar": "nutrition_value",
+        "fiber": "nutrition_value",
+        "allergen_potential": "nutrition_value"
+        }
+        '
+        5. For the nutrition_value, please use the appropriate unit such as "g", "mg", "kcal", etc.
         6. Please do not add any other text or explanation
         7. Do not use any markdown or code block format
+        8. example output:
+        {
+        "calory": "500 kcal",
+        "protein": "20 g",
+        "carbohydrate": "70 g",
+        "fat": "15 g",
+        "sugar": "5 g",
+        "fiber": "3 g",
+        "allergen_potential": "gluten, egg, nuts"
+        }
+        9. must be in JSON format can be parsed by JSON.parse()
 
         Thanks for your help!
       `;
-      const completion = await openai.chat.completions.create({
-        model: "qwen-vl-max",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompting,
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  //   url: "https://i.gojekapi.com/darkroom/gofood-indonesia/v2/images/uploads/63137a09-ec63-473b-a123-0cb44071acfc_menu-item-image_1630457203193.jpg",
-                  url: imageUrls[0], // Use the first image URL for nutrition analysis
+      const completion = await openai.chat.completions
+        .create({
+          model: "qwen-vl-max",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: prompting,
                 },
-              },
-            ],
-          },
-        ],
-      });
-      if (
-        !completion ||
-        !completion.choices ||
-        completion.choices.length === 0
-      ) {
-        return res.status(500).json({ error: "Failed to get nutrition info" });
-      }
+                {
+                  type: "image_url",
+                  image_url: {
+                    // url: "https://i.gojekapi.com/darkroom/gofood-indonesia/v2/images/uploads/63137a09-ec63-473b-a123-0cb44071acfc_menu-item-image_1630457203193.jpg",
+                    url: imageUrls[0], // Use the first image URL for nutrition analysis
+                  },
+                },
+              ],
+            },
+          ],
+        })
+        .catch((error) => {
+          console.error("OpenAI API error:", error);
+          return res.status(500).json({ error: "OpenAI API error" });
+        });
       let nutrition = {};
       try {
+        console.log("OpenAI response:", completion.choices[0].message.content);
         nutrition = JSON.parse(completion.choices[0].message.content);
       } catch (e) {
+        console.error(
+          "Failed to parse nutrition info:",
+          completion.choices[0].message.content
+        );
         return res
           .status(500)
           .json({ error: "Failed to parse nutrition info" });

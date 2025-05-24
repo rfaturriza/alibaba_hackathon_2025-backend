@@ -108,7 +108,7 @@ async function orderProductHandler(req, res) {
           parsedResponse.message
         );
         const alertMessage = `${parsedResponse.message} \n\n Are you sure you want to proceed with this order?`;
-        return res.status(200).json({
+        return res.status(400).json({
           error: "Daily nutrition limits exceeded",
           message: alertMessage,
           alert: true,
@@ -125,7 +125,7 @@ async function orderProductHandler(req, res) {
     await order.save();
 
     res.status(201).json({
-      success: true,
+      alert: false,
       data: {
         order_id: order._id,
         product: {

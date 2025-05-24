@@ -152,7 +152,7 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
 }
 ```
 
-- `200 OK` (nutrition exceeded)
+- `400 Bad Request` (exceeded daily nutrition limits)
 
 ```json
 {

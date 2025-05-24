@@ -263,6 +263,9 @@
         alert("Product created successfully!");
         form.reset();
         document.getElementById("previewContainer").innerHTML = "";
+        // Also clear lastFiles array so preview is empty for next submit
+        if (window.lastFiles !== undefined) window.lastFiles = [];
+        else if (typeof lastFiles !== "undefined") lastFiles = [];
       })
       .catch((err) => {
         alert("Error: " + err.message);

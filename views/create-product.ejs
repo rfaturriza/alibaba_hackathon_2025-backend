@@ -1,0 +1,276 @@
+<%- include('partials/header') %>
+<div class="container">
+  <h2 class="title">Create Product</h2>
+  <% if (error) { %>
+  <div class="alert alert-error"><%= error %></div>
+  <% } %> <% if (success) { %>
+  <div class="alert alert-success"><%= success %></div>
+  <% } %>
+  <form
+    action="/api/products"
+    method="POST"
+    enctype="multipart/form-data"
+    id="productForm"
+    onsubmit="event.preventDefault(); handleProductFormSubmit();"
+  >
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" name="title" value="<%= title || '' %>" required />
+    </div>
+    <div class="form-group">
+      <label>Description</label>
+      <textarea name="description" required><%= description || '' %></textarea>
+    </div>
+    <div class="form-group">
+      <label>Price (IDR)</label>
+      <input
+        type="number"
+        name="price"
+        value="<%= price || '' %>"
+        required
+        min="0"
+      />
+    </div>
+    <div class="form-group">
+      <label>Merchant ID (optional)</label>
+      <input type="text" name="merchant_id" value="<%= merchant_id || '' %>" />
+    </div>
+    <div class="form-group">
+      <label>Images</label>
+      <input
+        type="file"
+        name="images"
+        id="imagesInput"
+        accept="image/*"
+        multiple
+        required
+      />
+      <div id="previewContainer" class="preview-container">
+        <% if (preview && preview.length) { %> <% preview.forEach(function(src)
+        { %>
+        <img src="<%= src %>" alt="preview" class="preview-img" />
+        <% }) %> <% } %>
+      </div>
+    </div>
+    <button type="submit" class="btn" id="submitBtn">Create Product</button>
+    <div
+      id="loadingSpinner"
+      class="loading-spinner"
+      style="display: none; margin-top: 12px; text-align: center"
+    >
+      <div class="spinner"></div>
+      <div style="margin-top: 8px; color: #555; font-size: 1rem">
+        Uploading & Creating Product...
+      </div>
+    </div>
+  </form>
+</div>
+<style>
+  .container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 32px 28px 24px 28px;
+    border-radius: 16px;
+    box-shadow: 0 4px 32px #0002;
+    background: #fff;
+    font-family: "Inter", Arial, sans-serif;
+  }
+  @media (max-width: 600px) {
+    .container {
+      max-width: 98vw;
+      margin: 16px 1vw;
+      padding: 18px 6vw 16px 6vw;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px #0001;
+    }
+    .title {
+      font-size: 1.3rem;
+    }
+    .btn {
+      font-size: 1rem;
+      padding: 10px;
+    }
+    .preview-img {
+      width: 48px;
+      height: 48px;
+    }
+  }
+  .title {
+    text-align: center;
+    margin-bottom: 28px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #222;
+    letter-spacing: 0.5px;
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #333;
+  }
+  input[type="text"],
+  input[type="number"],
+  textarea {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    font-size: 1rem;
+    background: #f9fafb;
+    transition: border 0.2s;
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  textarea:focus {
+    border: 1.5px solid #0070f3;
+    outline: none;
+    background: #fff;
+  }
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #0070f3 60%, #0051a8 100%);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px #0070f320;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background: linear-gradient(90deg, #0051a8 0%, #0070f3 100%);
+  }
+  .alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 1rem;
+  }
+  .alert-error {
+    background: #ffeaea;
+    color: #b00;
+    border: 1px solid #ffb3b3;
+  }
+  .alert-success {
+    background: #eaffea;
+    color: #080;
+    border: 1px solid #b3ffb3;
+  }
+  .preview-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .preview-img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1.5px solid #eee;
+    box-shadow: 0 1px 4px #0001;
+  }
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 4px solid #e0e0e0;
+    border-top: 4px solid #0070f3;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 2px;
+  }
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+<script>
+  // Image preview for multiple files
+  document.addEventListener("DOMContentLoaded", function () {
+    const input = document.getElementById("imagesInput");
+    const preview = document.getElementById("previewContainer");
+    let lastFiles = [];
+    if (input) {
+      input.addEventListener("change", function (e) {
+        // Keep previous files if user selects one by one
+        const newFiles = Array.from(e.target.files);
+        lastFiles = lastFiles.concat(newFiles);
+        // Remove duplicates by name+size
+        const unique = [];
+        const seen = new Set();
+        lastFiles.forEach((f) => {
+          const key = f.name + f.size;
+          if (!seen.has(key)) {
+            unique.push(f);
+            seen.add(key);
+          }
+        });
+        lastFiles = unique;
+        preview.innerHTML = "";
+        lastFiles.forEach((file) => {
+          const reader = new FileReader();
+          reader.onload = function (ev) {
+            const img = document.createElement("img");
+            img.src = ev.target.result;
+            img.className = "preview-img";
+            preview.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        });
+        // Update the input's files property
+        const dataTransfer = new DataTransfer();
+        lastFiles.forEach((f) => dataTransfer.items.add(f));
+        input.files = dataTransfer.files;
+      });
+    }
+  });
+
+  // Handle form submit with preventDefault and AJAX
+  function handleProductFormSubmit() {
+    const form = document.getElementById("productForm");
+    const formData = new FormData(form);
+    const submitBtn = document.getElementById("submitBtn");
+    const loadingSpinner = document.getElementById("loadingSpinner");
+    submitBtn.disabled = true;
+    loadingSpinner.style.display = "flex";
+    fetch("/api/products", {
+      method: "POST",
+      body: formData,
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to create product");
+        alert("Product created successfully!");
+        form.reset();
+        document.getElementById("previewContainer").innerHTML = "";
+      })
+      .catch((err) => {
+        alert("Error: " + err.message);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        loadingSpinner.style.display = "none";
+      });
+  }
+</script>
+<%- include('partials/footer') %>

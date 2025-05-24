@@ -28,6 +28,8 @@ connectMongo()
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 // Serve static files from the /static directory (for image uploads)
 app.use("/static", express.static(path.join(__dirname, "static")));
 // API routes
@@ -38,6 +40,19 @@ app.get("/api/products", getProductsHandler);
 app.post("/api/products", createProductHandler);
 app.post("/api/order", orderProductHandler);
 app.get("/api/histories", getHistoriesOrderHandler);
+
+// Render create product form
+app.get("/create-product", (req, res) => {
+  res.render("create-product", {
+    error: null,
+    success: null,
+    title: "",
+    description: "",
+    price: "",
+    merchant_id: "",
+    preview: [],
+  });
+});
 
 // Start the server
 app.listen(PORT, () => {

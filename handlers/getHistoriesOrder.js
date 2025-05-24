@@ -12,11 +12,23 @@ async function getHistoriesOrderHandler(req, res) {
 
   try {
     await connectMongo();
-    const histories = await Order.find({ user_id }).sort({ created_at: -1 });
+    const histories = await Order.find({ user_id })
+      .sort({ createdAt: -1 })
+      .populate("product");
 
     res.status(200).json({
       message: "Order histories fetched successfully",
-      data: histories,
+      data: histories.map((order) => {
+        const { product, ...orderData } = order.toObject();
+        return {
+          order_id: order._id.toString(),
+          ...orderData,
+          product: {
+            id: product._id.toString(),
+            ...product.toObject(),
+          },
+        };
+      }),
     });
   } catch (error) {
     console.error("Failed to get order histories:", error);

@@ -34,7 +34,8 @@ async function orderProductHandler(req, res) {
   const { product_id, user_id, force_order } = req.body;
   try {
     await connectMongo();
-    const product = await Product.findById(product_id);
+    const product = await Product.findOne({ _id: product_id });
+    console.log("Product found:", product);
     if (!product) return res.status(404).json({ error: "Product not found" });
     const nutritionToday = await generateOrderedToday(user_id);
     const prompting = `
@@ -63,40 +64,46 @@ async function orderProductHandler(req, res) {
         6. Only output valid JSON.
     `;
 
-    const completion = await openai.chat.completions
-      .create({
-        model: "qwen-vl-max",
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompting,
-              },
-            ],
-          },
-        ],
-      })
-      .catch((error) => {
-        console.error("OpenAI API error:", error);
-        return res.status(500).json({ error: "OpenAI API error" });
-      });
-    const response = completion.choices[0].message.content;
-    let parsedResponse;
-    try {
-      parsedResponse = JSON.parse(response);
-    } catch (error) {
-      console.error("Failed to parse OpenAI response:", error);
-      return res.status(500).json({ error: "Failed to parse OpenAI response" });
-    }
-
-    if (parsedResponse.alert && !force_order) {
-      console.warn("Daily nutrition limits exceeded:", parsedResponse.message);
-      return res.status(400).json({
-        error: "Daily nutrition limits exceeded",
-        message: parsedResponse.message,
-      });
+    if (!force_order) {
+      const completion = await openai.chat.completions
+        .create({
+          model: "qwen-vl-max",
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: prompting,
+                },
+              ],
+            },
+          ],
+        })
+        .catch((error) => {
+          console.error("OpenAI API error:", error);
+          return res.status(500).json({ error: "OpenAI API error" });
+        });
+      const response = completion.choices[0].message.content;
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(response);
+      } catch (error) {
+        console.error("Failed to parse OpenAI response:", error);
+        return res
+          .status(500)
+          .json({ error: "Failed to parse OpenAI response" });
+      }
+      if (parsedResponse.alert && !force_order) {
+        console.warn(
+          "Daily nutrition limits exceeded:",
+          parsedResponse.message
+        );
+        return res.status(400).json({
+          error: "Daily nutrition limits exceeded",
+          message: parsedResponse.message,
+        });
+      }
     }
     // Save order
     const order = new Order({
@@ -105,11 +112,15 @@ async function orderProductHandler(req, res) {
     });
 
     await order.save();
+
     res.status(201).json({
       success: true,
       data: {
         order_id: order._id,
-        ...order.toObject(),
+        product: {
+          id: product._id.toString(),
+          ...product.toObject(),
+        },
       },
       message: "Order placed successfully",
     });

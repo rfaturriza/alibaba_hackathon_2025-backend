@@ -209,25 +209,30 @@
   document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById("imagesInput");
     const preview = document.getElementById("previewContainer");
-    let lastFiles = [];
+    // Use window-scoped lastFiles so it can be reset after submit
+    window.lastFiles = [];
     if (input) {
       input.addEventListener("change", function (e) {
-        // Keep previous files if user selects one by one
+        // If input.files was just reset, start fresh
+        if (!window.lastFiles || formJustReset) {
+          window.lastFiles = [];
+          formJustReset = false;
+        }
         const newFiles = Array.from(e.target.files);
-        lastFiles = lastFiles.concat(newFiles);
+        window.lastFiles = window.lastFiles.concat(newFiles);
         // Remove duplicates by name+size
         const unique = [];
         const seen = new Set();
-        lastFiles.forEach((f) => {
+        window.lastFiles.forEach((f) => {
           const key = f.name + f.size;
           if (!seen.has(key)) {
             unique.push(f);
             seen.add(key);
           }
         });
-        lastFiles = unique;
+        window.lastFiles = unique;
         preview.innerHTML = "";
-        lastFiles.forEach((file) => {
+        window.lastFiles.forEach((file) => {
           const reader = new FileReader();
           reader.onload = function (ev) {
             const img = document.createElement("img");
@@ -239,11 +244,14 @@
         });
         // Update the input's files property
         const dataTransfer = new DataTransfer();
-        lastFiles.forEach((f) => dataTransfer.items.add(f));
+        window.lastFiles.forEach((f) => dataTransfer.items.add(f));
         input.files = dataTransfer.files;
       });
     }
   });
+
+  // Track if form was just reset
+  let formJustReset = false;
 
   // Handle form submit with preventDefault and AJAX
   function handleProductFormSubmit() {
@@ -263,9 +271,8 @@
         alert("Product created successfully!");
         form.reset();
         document.getElementById("previewContainer").innerHTML = "";
-        // Also clear lastFiles array so preview is empty for next submit
-        if (window.lastFiles !== undefined) window.lastFiles = [];
-        else if (typeof lastFiles !== "undefined") lastFiles = [];
+        window.lastFiles = [];
+        formJustReset = true;
       })
       .catch((err) => {
         alert("Error: " + err.message);

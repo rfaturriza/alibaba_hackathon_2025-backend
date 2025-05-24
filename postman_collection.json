@@ -1,0 +1,77 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Alibaba Hackathon 2025 Backend API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"]
+        }
+      }
+    },
+    {
+      "name": "Create Product (with images)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "title", "value": "Nasi Goreng Spesial", "type": "text" },
+            {
+              "key": "description",
+              "value": "Nasi goreng dengan ayam, telur, dan sayur.",
+              "type": "text"
+            },
+            { "key": "price", "value": "25000", "type": "text" },
+            { "key": "merchant_id", "value": "", "type": "text" },
+            { "key": "images", "type": "file", "src": "" }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/products",
+          "host": ["{{base_url}}"],
+          "path": ["api", "products"]
+        }
+      }
+    },
+    {
+      "name": "Order Product",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"product_id\": \"<PRODUCT_ID>\",\n  \"user_id\": \"testuser1\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/order",
+          "host": ["{{base_url}}"],
+          "path": ["api", "order"]
+        }
+      }
+    },
+    {
+      "name": "Get Order Histories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/histories?user_id=testuser1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "histories"],
+          "query": [{ "key": "user_id", "value": "testuser1" }]
+        }
+      }
+    }
+  ],
+  "variable": [{ "key": "base_url", "value": "http://localhost:3000" }]
+}

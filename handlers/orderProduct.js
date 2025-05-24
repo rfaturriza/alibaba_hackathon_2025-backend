@@ -93,13 +93,11 @@ async function orderProductHandler(req, res) {
       created_at: new Date(),
     });
     await order.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: order,
-        message: "Order placed successfully",
-      });
+    res.status(201).json({
+      success: true,
+      data: order,
+      message: "Order placed successfully",
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Internal Server Error" });

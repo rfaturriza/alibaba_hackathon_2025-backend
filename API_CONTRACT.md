@@ -111,7 +111,38 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
 
 **Response:**
 
-- `200 OK` (order success)
+- `201 Created` (order placed successfully)
+
+````json
+{
+  "message": "Order placed successfully",
+  "data": {
+    "product_id": "string",
+    "order_id": "string",
+    "product": {
+      "id": "string",
+      "images_url": ["/static/filename1.jpg", ...],
+      "title": "string",
+      "description": "string",
+      "price": 25000,
+      "nutrition": {
+          "calory": "string",
+          "protein": "string",
+          "carbohydrate": "string",
+          "fat": "string",
+          "sugar": "string",
+          "fiber": "string",
+          "allergen_potential": "string"
+      },
+      "merchant_id": "string|null",
+      "createdAt": "ISODate",
+      "updatedAt": "ISODate"
+    },
+    "user_id": "string",
+    "createdAt": "ISODate",
+    "updatedAt": "ISODate"
+  }
+}
 
 ```json
 {
@@ -143,7 +174,7 @@ Order a product. Checks daily nutrition limits and saves order if within limits.
     "updatedAt": "ISODate"
   }
 }
-```
+````
 
 - `200 OK` (nutrition exceeded)
 
